@@ -18,7 +18,7 @@ async def ex(ctx, arg):
 @client.group()
 async def luisp(ctx):
     if ctx.invoked_subcommand is None:
-        await ctx.send('comando invalido...')
+        await ctx.send('comando invalido... a lo mejor quisiste decir .luisp img?')
 
 @luisp.command()
 async def img(ctx):
@@ -75,4 +75,4 @@ async def on_message(message):
 
 
 
-client.run('NjkxMjQ5Mjc1MDIzMjYxNzM2.XniOyg.N9ut-ozzd5closr0TQf1Tfb7R7w')
+client.run('NjkxMjQ5Mjc1MDIzMjYxNzM2.Xnii4A.AfTM2OmPtbgzs3uauwCOCvVPlEc')
