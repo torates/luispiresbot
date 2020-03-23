@@ -1,11 +1,12 @@
 import discord
 import random
 from discord.ext import commands
+from bitcoin import BitcoinPrice
 
 client = commands.Bot(command_prefix='.')
 
 @client.command()
-async def test(ctx, *arg):
+async def hey(ctx, *arg):
     await ctx.send('{}'.format(' '.join(arg)))
 
 @client.command()
@@ -14,6 +15,10 @@ async def ex(ctx, arg):
         print('exiting')
         await ctx.send('ok me voy ps... mal amigo')
         await client.close()
+
+@client.command()
+async def btc(ctx):
+    await ctx.send('bitcoin esta a {} dolares..'.format(BitcoinPrice.coinbase()))
 
 @client.group()
 async def luisp(ctx):
@@ -75,4 +80,4 @@ async def on_message(message):
 
 
 
-client.run('NjkxMjQ5Mjc1MDIzMjYxNzM2.Xnii4A.AfTM2OmPtbgzs3uauwCOCvVPlEc')
+client.run('NjkxMjQ5Mjc1MDIzMjYxNzM2.XnjPlw.0mUCt81gtvlEfiqv44AxEtXDvHY')
