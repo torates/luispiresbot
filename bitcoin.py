@@ -7,5 +7,4 @@ class BitcoinPrice:
         html_soup = BeautifulSoup(r.text, 'html.parser')
         prices = html_soup.find("div", id='price')
         prices = prices.string
-        global prices
         return prices

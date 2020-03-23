@@ -2,6 +2,7 @@ import discord
 import random
 from discord.ext import commands
 from bitcoin import BitcoinPrice
+from coronavirus import *
 
 client = commands.Bot(command_prefix='.')
 
@@ -18,7 +19,9 @@ async def ex(ctx, arg):
 
 @client.command()
 async def btc(ctx):
-    await ctx.send('bitcoin esta a {} dolares..'.format(BitcoinPrice.coinbase()))
+    global btcprice
+    btcprice = BitcoinPrice.coinbase()
+    await ctx.send('bitcoin esta a {} dolares..'.format(btcprice))
 
 @client.group()
 async def luisp(ctx):
@@ -31,6 +34,28 @@ async def img(ctx):
     print(image_to_send)
     await ctx.send(file=discord.File("C:\\Users\\misu1\\OneDrive\\Documents\\luispiresbot\\image_database\\{}.jpeg".format(image_to_send)))
 
+@client.group()
+async def coronavirus(ctx):
+    if ctx.invoked_subcommand is None:
+        await ctx.send('comando invalido... a lo mejor quisiste decir \'.coronavirus deaths\' o \'.coronavirus cases?\'')
+
+@coronavirus.command()
+async def casestotal(ctx):
+    global total
+    total = totalCases()
+    await ctx.send('hay actualmente {} casos TOTALES de COVID19'.format(total))
+
+@coronavirus.command()
+async def actcases(ctx):
+    global activecases
+    activecases = activeCases()
+    await ctx.send('hay actualmente {} casos ACTIVOS de COVID19'.format(activecases))
+
+@coronavirus.command()
+async def perished(ctx):
+    global deathsvar
+    deathsvar = deaths()
+    await ctx.send('hay actualmente {} muertos gracias al COVID19'.format(deathsvar))
 
 @client.event
 async def on_ready():
@@ -58,7 +83,7 @@ async def on_message_delete(message):
 
 @client.event
 async def on_message(message):
-    culprit = message.author.id
+    culprit = message.author.name
     praises = [ 'HA HABLADO EL DIOS {0.author.mention} pires... el demonio'.format(message),
                     'alabado sea {0.author.mention} pires... el monsenor robesto sipols'.format(message),
                     'las cartas de {0.author.mention} segun san jose... verisuclo 9 cap 1'.format(message),
@@ -72,7 +97,7 @@ async def on_message(message):
                     'IGNIS SANCTUS Fuego eterno',
                     'ok toy ladiyao'
     ]
-    if culprit == '691249275023261736':
+    if culprit == 'FlamingMilhouse':
         await message.channel.send(random.choice(praises))
     else:
         pass
@@ -80,4 +105,4 @@ async def on_message(message):
 
 
 
-client.run('NjkxMjQ5Mjc1MDIzMjYxNzM2.XnjPlw.0mUCt81gtvlEfiqv44AxEtXDvHY')
+client.run('NjkxMjQ5Mjc1MDIzMjYxNzM2.XnjcfA.KUhEah8YPKQrmLL7-h9bxjdTt84')
