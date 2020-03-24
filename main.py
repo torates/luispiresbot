@@ -2,9 +2,11 @@ import discord
 import random
 from discord.ext import commands
 from bitcoin import BitcoinPrice
-from coronavirus import *
+from coronavirus import CoronaVirus
+import youtube_dl
 
 client = commands.Bot(command_prefix='.')
+
 
 @client.command()
 async def hey(ctx, *arg):
@@ -16,6 +18,23 @@ async def ex(ctx, arg):
         print('exiting')
         await ctx.send('ok me voy ps... mal amigo')
         await client.close()
+
+@client.command()
+async def play(ctx, url):
+    server = ctx.message.guild
+    vc = ctx.message.author.voice.channel
+    if type(vc) is None:
+        ctx.send('tienes que estar en un canal de vos')
+    global voiceclient
+    voiceclient = await vc.connect()
+    player = await voiceclient.create_ytdl_player(url)
+    players[server.id] = player
+    player.start
+    # elif arg == 'vete':
+    #     await voiceclient.disconnect()
+    # else:
+    #     ctx.send('para que me una solo escriba .ven ya, para irme escribe .ven vete')
+
 
 @client.command()
 async def btc(ctx):
@@ -35,26 +54,25 @@ async def img(ctx):
     await ctx.send(file=discord.File("C:\\Users\\misu1\\OneDrive\\Documents\\luispiresbot\\image_database\\{}.jpeg".format(image_to_send)))
 
 @client.group()
-async def coronavirus(ctx):
+async def virus(ctx):
     if ctx.invoked_subcommand is None:
         await ctx.send('comando invalido... a lo mejor quisiste decir \'.coronavirus deaths\' o \'.coronavirus cases?\'')
 
-@coronavirus.command()
+@virus.command()
 async def casestotal(ctx):
-    global total
-    total = totalCases()
+    total = CoronaVirus.totalCases()
     await ctx.send('hay actualmente {} casos TOTALES de COVID19'.format(total))
 
-@coronavirus.command()
+@virus.command()
 async def actcases(ctx):
     global activecases
-    activecases = activeCases()
+    activecases = CoronaVirus.activeCases()
     await ctx.send('hay actualmente {} casos ACTIVOS de COVID19'.format(activecases))
 
-@coronavirus.command()
+@virus.command()
 async def perished(ctx):
     global deathsvar
-    deathsvar = deaths()
+    deathsvar = CoronaVirus.deaths()
     await ctx.send('hay actualmente {} muertos gracias al COVID19'.format(deathsvar))
 
 @client.event
@@ -105,4 +123,4 @@ async def on_message(message):
 
 
 
-client.run('NjkxMjQ5Mjc1MDIzMjYxNzM2.XnjcfA.KUhEah8YPKQrmLL7-h9bxjdTt84')
+client.run('NjkxMjQ5Mjc1MDIzMjYxNzM2.Xnolew.diu-SGXgJBb1WC50vrYctZvO7Zc')
