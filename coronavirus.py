@@ -25,5 +25,3 @@ class CoronaVirus:
         casesactive = casesactive[2].find("span")
         casesactive = casesactive.string
         return casesactive
-
-CoronaVirus.totalCases()
