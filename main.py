@@ -1,44 +1,83 @@
 import discord
-import random
 from discord.ext import commands
+
 from bitcoin import BitcoinPrice
 from coronavirus import CoronaVirus
+
 import youtube_dl
+import random
+import os
 
 client = commands.Bot(command_prefix='.')
 
 
 @client.command()
-async def hey(ctx, *arg):
-    await ctx.send('{}'.format(' '.join(arg)))
-
-@client.command()
-async def ex(ctx, arg):
-    if arg == 'vete':
-        print('exiting')
-        await ctx.send('ok me voy ps... mal amigo')
-        await client.close()
+async def exit(ctx):
+    print('exiting')
+    await ctx.send('ok me voy ps... mal amigo')
+    await client.close()
 
 @client.command()
 async def play(ctx, url):
+    songthere = os.path.isfile('./song.mp3')
+    try:
+        if songthere:
+            os.remove('./song.mp3')
+            print('borrando mp3')
+            await ctx.send('limpiando el cache de audio')
+    except PermissionError:
+        await ctx.send('La musica esta sonando. ESPER...')
     server = ctx.message.guild
     vc = ctx.message.author.voice.channel
     if type(vc) is None:
         ctx.send('tienes que estar en un canal de vos')
     global voiceclient
     voiceclient = await vc.connect()
-    player = await voiceclient.create_ytdl_player(url)
-    players[server.id] = player
-    player.start
-    # elif arg == 'vete':
-    #     await voiceclient.disconnect()
-    # else:
-    #     ctx.send('para que me una solo escriba .ven ya, para irme escribe .ven vete')
 
+    ydl_opts = {
+        'format': 'bestaudio/best',
+        'postprocessors': [{
+            'key': 'FFmpegExtractAudio',
+            'preferredcodec': 'mp3',
+            'preferredquality': '192',
+        }]
+    }
+    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+        print('bajando audio..')
+        ydl.download([url])
+
+    for file in os.listdir('./'):
+        if file.endswith('.mp3'):
+            os.rename(file, 'song.mp3')
+
+    voiceclient.play(discord.FFmpegPCMAudio('song.mp3'))
+    voiceclient.source = discord.PCMVolumeTransformer(voiceclient.source)
+    voiceclient.source.volume = 5
+
+@client.command()
+async def leave(ctx):
+    if voiceclient.is_playing():
+        await voiceclient.stop():
+        await voiceclient.disconnect()
+    else:
+        await ctx.send('no toy reproduciendo nad')
+
+@client.command()
+async def pause(ctx):
+    if voiceclient.is_playing():
+        await voiceclient.pause()
+    else:
+        await ctx.send('no toy reproduciendo nad')
+
+@client.command()
+async def resume(ctx):
+    if voiceclient.is_playing():
+        await voiceclient.resume()
+    else:
+        await ctx.send('no toy reproduciendo nad')
 
 @client.command()
 async def btc(ctx):
-    global btcprice
     btcprice = BitcoinPrice.coinbase()
     await ctx.send('bitcoin esta a {} dolares..'.format(btcprice))
 
@@ -65,13 +104,11 @@ async def casestotal(ctx):
 
 @virus.command()
 async def actcases(ctx):
-    global activecases
     activecases = CoronaVirus.activeCases()
     await ctx.send('hay actualmente {} casos ACTIVOS de COVID19'.format(activecases))
 
 @virus.command()
 async def perished(ctx):
-    global deathsvar
     deathsvar = CoronaVirus.deaths()
     await ctx.send('hay actualmente {} muertos gracias al COVID19'.format(deathsvar))
 
@@ -123,4 +160,4 @@ async def on_message(message):
 
 
 
-client.run('NjkxMjQ5Mjc1MDIzMjYxNzM2.Xnolew.diu-SGXgJBb1WC50vrYctZvO7Zc')
+client.run('NjkxMjQ5Mjc1MDIzMjYxNzM2.XnqXVg.y7La0UsI084ygI1rrZBqhH3cSEk')
