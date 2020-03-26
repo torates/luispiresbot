@@ -17,64 +17,67 @@ async def exit(ctx):
     await ctx.send('ok me voy ps... mal amigo')
     await client.close()
 
-@client.command()
-async def play(ctx, url):
-    songthere = os.path.isfile('./song.mp3')
-    try:
-        if songthere:
-            os.remove('./song.mp3')
-            print('borrando mp3')
-            await ctx.send('limpiando el cache de audio')
-    except PermissionError:
-        await ctx.send('La musica esta sonando. ESPER...')
-    server = ctx.message.guild
-    vc = ctx.message.author.voice.channel
-    if type(vc) is None:
-        ctx.send('tienes que estar en un canal de vos')
-    global voiceclient
-    voiceclient = await vc.connect()
+class Voice(commands.Cog):
+    @commands.command()
+    async def play(self, ctx, url):
+        songthere = os.path.isfile('./song.mp3')
+        try:
+            if songthere:
+                os.remove('./song.mp3')
+                print('borrando mp3')
+                await ctx.send('limpiando el cache de audio')
+        except PermissionError:
+            await ctx.send('La musica esta sonando. ESPER...')
+        server = ctx.message.guild
+        vc = ctx.message.author.voice.channel
+        if type(vc) is None:
+            ctx.send('tienes que estar en un canal de vos')
+        global voiceclient
+        voiceclient = await vc.connect()
 
-    ydl_opts = {
-        'format': 'bestaudio/best',
-        'postprocessors': [{
-            'key': 'FFmpegExtractAudio',
-            'preferredcodec': 'mp3',
-            'preferredquality': '192',
-        }]
-    }
-    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-        print('bajando audio..')
-        ydl.download([url])
+        ydl_opts = {
+            'format': 'bestaudio/best',
+            'postprocessors': [{
+                'key': 'FFmpegExtractAudio',
+                'preferredcodec': 'mp3',
+                'preferredquality': '192',
+            }]
+        }
+        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+            print('bajando audio..')
+            ydl.download([url])
 
-    for file in os.listdir('./'):
-        if file.endswith('.mp3'):
-            os.rename(file, 'song.mp3')
+        for file in os.listdir('./'):
+            if file.endswith('.mp3'):
+                os.rename(file, 'song.mp3')
 
-    voiceclient.play(discord.FFmpegPCMAudio('song.mp3'))
-    voiceclient.source = discord.PCMVolumeTransformer(voiceclient.source)
-    voiceclient.source.volume = 5
+        voiceclient.play(discord.FFmpegPCMAudio('song.mp3'))
+        voiceclient.source = discord.PCMVolumeTransformer(voiceclient.source)
+        voiceclient.source.volume = 200000
 
-@client.command()
-async def leave(ctx):
-    if voiceclient.is_playing():
-        await voiceclient.stop():
-        await voiceclient.disconnect()
-    else:
-        await ctx.send('no toy reproduciendo nad')
 
-@client.command()
-async def pause(ctx):
-    if voiceclient.is_playing():
-        await voiceclient.pause()
-    else:
-        await ctx.send('no toy reproduciendo nad')
+    @commands.command()
+    async def leave(self, ctx):
+        if voiceclient.is_connected() or voiceclient.is_playing():
+            voiceclient.stop()
+            await voiceclient.disconnect()
+        else:
+            await ctx.send('no toy reproduciendo nad')
 
-@client.command()
-async def resume(ctx):
-    if voiceclient.is_playing():
-        await voiceclient.resume()
-    else:
-        await ctx.send('no toy reproduciendo nad')
+    @commands.command()
+    async def pause(self, ctx):
+        if voiceclient.is_playing():
+            voiceclient.pause()
+        else:
+            await ctx.send('no toy reproduciendo nad')
+
+    @commands.command()
+    async def resume(self, ctx):
+        if voiceclient.is_paused():
+            voiceclient.resume()
+        else:
+            await ctx.send('no toy reproduciendo nad')
+
 
 @client.command()
 async def btc(ctx):
@@ -114,6 +117,7 @@ async def perished(ctx):
 
 @client.event
 async def on_ready():
+    client.add_cog(Voice(client))
     await client.change_presence(status=discord.Status('dnd'))
     print('We have logged in as {0.user}'.format(client))
 
